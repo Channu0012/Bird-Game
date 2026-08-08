@@ -4,38 +4,49 @@ const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
 const speedLabel = document.getElementById('speedLabel');
 const overlay = document.getElementById('overlay');
-const startButton = document.getElementById('startButton');
 const soundToggle = document.getElementById('soundToggle');
+const pauseButton = document.getElementById('pauseButton');
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 620;
+const DIFFICULTY_CONFIG = {
+    easy: { label: 'Easy', gravity: 0.48, flapPower: -8.7, pipeSpeed: 3.6, pipeGap: 210, spawnDelay: 1550 },
+    medium: { label: 'Medium', gravity: 0.52, flapPower: -9.1, pipeSpeed: 4.2, pipeGap: 188, spawnDelay: 1350 },
+    hard: { label: 'Hard', gravity: 0.58, flapPower: -9.7, pipeSpeed: 4.8, pipeGap: 170, spawnDelay: 1180 },
+};
 
 let width = BASE_WIDTH;
 let height = BASE_HEIGHT;
 let groundY = 540;
 let gravity = 0.48;
 let flapPower = -8.7;
-let pipeSpeed = 3.9;
+let pipeSpeed = 3.6;
 let pipeWidth = 95;
 let pipeGap = 210;
 let spawnDelay = 1550;
 let audioContext = null;
+let musicLoop = null;
 
 const clamp = (min, value, max) => Math.min(Math.max(value, min), max);
 
 const state = {
     started: false,
     over: false,
+    paused: false,
     score: 0,
     best: Number(localStorage.getItem('crazybird-best') || 0),
     lastSpawn: 0,
     pipes: [],
+    particles: [],
     muted: false,
+    difficulty: 'easy',
     bird: {
         x: 150,
         y: BASE_HEIGHT / 2,
         radius: 23,
         velocity: 0,
+        wingPhase: 0,
+        tilt: 0,
     },
 };
 
@@ -105,6 +116,28 @@ function playSound(type) {
     }
 }
 
+function stopBackgroundMusic() {
+    if (musicLoop) {
+        clearInterval(musicLoop);
+        musicLoop = null;
+    }
+}
+
+function startBackgroundMusic() {
+    if (state.muted || state.paused || !state.started || state.over) return;
+    stopBackgroundMusic();
+
+    const melody = [220, 277, 330, 392, 330, 277, 220, 196];
+    let index = 0;
+
+    musicLoop = setInterval(() => {
+        if (state.muted || state.paused || !state.started || state.over) return;
+        const frequency = melody[index % melody.length];
+        playTone({ frequency, duration: 0.18, type: 'triangle', volume: 0.018, slide: 60 });
+        index += 1;
+    }, 320);
+}
+
 function resizeCanvas() {
     const bounds = document.querySelector('.game-card').getBoundingClientRect();
     let nextWidth = Math.max(280, Math.min(bounds.width, 1100));
@@ -125,12 +158,12 @@ function resizeCanvas() {
     width = nextWidth;
     height = nextHeight;
     groundY = height * 0.87;
-    gravity = 0.48 * (height / BASE_HEIGHT);
-    flapPower = -8.7 * (height / BASE_HEIGHT);
-    pipeSpeed = (3.6 + state.score * 0.12) * (height / BASE_HEIGHT);
+    gravity = (DIFFICULTY_CONFIG[state.difficulty].gravity || 0.48) * (height / BASE_HEIGHT);
+    flapPower = (DIFFICULTY_CONFIG[state.difficulty].flapPower || -8.7) * (height / BASE_HEIGHT);
+    pipeSpeed = (DIFFICULTY_CONFIG[state.difficulty].pipeSpeed || 3.6) * (height / BASE_HEIGHT);
     pipeWidth = Math.max(58, width * 0.105);
-    pipeGap = clamp(150, height * 0.34, 220);
-    spawnDelay = 1550;
+    pipeGap = clamp(150, (DIFFICULTY_CONFIG[state.difficulty].pipeGap || 210) - state.score * 1.5, 220);
+    spawnDelay = DIFFICULTY_CONFIG[state.difficulty].spawnDelay || 1550;
 
     const dpr = window.devicePixelRatio || 1;
     canvas.width = Math.round(width * dpr);
@@ -145,24 +178,70 @@ function resetBird() {
     state.bird.y = height * 0.48;
     state.bird.radius = Math.max(18, height * 0.037);
     state.bird.velocity = 0;
+    state.bird.wingPhase = 0;
+    state.bird.tilt = 0;
+}
+
+function spawnParticles(x, y, color = '#fff7c2', count = 12) {
+    for (let i = 0; i < count; i += 1) {
+        state.particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 3.6,
+            vy: (Math.random() - 0.8) * 3.6,
+            life: 26 + Math.random() * 18,
+            size: Math.random() * 4 + 2,
+            color,
+        });
+    }
+}
+
+function updateParticles() {
+    state.particles = state.particles.filter((particle) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.08;
+        particle.life -= 1;
+        return particle.life > 0;
+    });
+}
+
+function drawParticles() {
+    for (const particle of state.particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, particle.life / 40);
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
 }
 
 function applyDifficulty() {
-    const difficulty = 1 + Math.min(3.2, state.score * 0.08);
-    pipeSpeed = (3.6 * difficulty) * (height / BASE_HEIGHT);
-    pipeGap = clamp(148, 210 - state.score * 1.8, 220);
-    spawnDelay = Math.max(720, 1500 - state.score * 25);
+    const config = DIFFICULTY_CONFIG[state.difficulty];
+    const difficultyBoost = 1 + Math.min(3.2, state.score * 0.08);
+    pipeSpeed = config.pipeSpeed * difficultyBoost * (height / BASE_HEIGHT);
+    pipeGap = clamp(148, config.pipeGap - state.score * 1.8, config.pipeGap + 10);
+    spawnDelay = Math.max(720, config.spawnDelay - state.score * 25);
     updateSpeedHud();
 }
 
-function resetGame() {
-    state.pipes = [];
-    state.score = 0;
-    state.lastSpawn = 0;
-    state.over = false;
-    state.started = false;
+function setDifficulty(level) {
+    state.difficulty = level;
+    resizeCanvas();
     resetBird();
     applyDifficulty();
+}
+
+function showStartMenu() {
+    state.started = false;
+    state.over = false;
+    state.paused = false;
+    stopBackgroundMusic();
+    resetBird();
+    state.pipes = [];
+    state.score = 0;
     scoreEl.textContent = '0';
     bestEl.textContent = String(state.best);
     overlay.classList.add('visible');
@@ -170,41 +249,90 @@ function resetGame() {
         <div class="panel">
             <div class="panel-glow"></div>
             <h1>Crazy Bird</h1>
-            <p>Tap, click, or press space to flap</p>
-            <button id="startButton" type="button">Play</button>
+            <p>Choose your challenge</p>
+            <div class="difficulty-row">
+                ${Object.entries(DIFFICULTY_CONFIG)
+                    .map(([key, config]) => `<button class="difficulty-btn ${state.difficulty === key ? 'active' : ''}" data-difficulty="${key}" type="button">${config.label}</button>`)
+                    .join('')}
+            </div>
+            <div class="menu-note">Tap, click, or press space to flap</div>
         </div>
     `;
-    document.getElementById('startButton').addEventListener('click', startGame);
+
+    document.querySelectorAll('.difficulty-btn').forEach((button) => {
+        button.addEventListener('click', () => {
+            setDifficulty(button.dataset.difficulty);
+            startGame(button.dataset.difficulty);
+        });
+    });
 }
 
-function startGame() {
+function startGame(selectedDifficulty = state.difficulty) {
     ensureAudio();
     state.started = true;
     state.over = false;
+    state.paused = false;
+    state.score = 0;
+    state.lastSpawn = 0;
+    state.pipes = [];
+    state.particles = [];
+    setDifficulty(selectedDifficulty);
     scoreEl.textContent = '0';
     overlay.classList.remove('visible');
     overlay.innerHTML = '';
     resetBird();
-    state.pipes = [];
-    state.score = 0;
-    state.lastSpawn = 0;
     state.bird.velocity = flapPower;
     playSound('start');
-    applyDifficulty();
+    startBackgroundMusic();
+}
+
+function pauseGame() {
+    if (!state.started || state.over) return;
+
+    state.paused = !state.paused;
+    pauseButton.textContent = state.paused ? 'Resume' : 'Pause';
+
+    if (state.paused) {
+        stopBackgroundMusic();
+        overlay.classList.add('visible');
+        overlay.innerHTML = `
+            <div class="panel">
+                <div class="panel-glow"></div>
+                <h1>Paused</h1>
+                <p>Take a breath, then jump back in.</p>
+                <button id="resumeButton" type="button">Resume</button>
+            </div>
+        `;
+        document.getElementById('resumeButton').addEventListener('click', pauseGame);
+    } else {
+        overlay.classList.remove('visible');
+        overlay.innerHTML = '';
+        startBackgroundMusic();
+    }
 }
 
 function flap() {
     ensureAudio();
 
-    if (!state.started) {
-        startGame();
-    } else if (state.over) {
-        resetGame();
-        startGame();
-    } else {
-        state.bird.velocity = flapPower;
-        playSound('flap');
+    if (!state.started && !state.over) {
+        showStartMenu();
+        return;
     }
+
+    if (state.paused) {
+        pauseGame();
+        return;
+    }
+
+    if (state.over) {
+        showStartMenu();
+        return;
+    }
+
+    state.bird.velocity = flapPower;
+    state.bird.wingPhase = 0;
+    spawnParticles(state.bird.x - 8, state.bird.y + 8, '#ffe08a', 9);
+    playSound('flap');
 }
 
 function createPipe() {
@@ -237,11 +365,13 @@ function checkCollision() {
 }
 
 function updateGame() {
-    if (!state.started || state.over) return;
+    if (!state.started || state.over || state.paused) return;
 
     applyDifficulty();
     state.bird.velocity += gravity;
     state.bird.y += state.bird.velocity;
+    state.bird.wingPhase += 0.24;
+    state.bird.tilt = clamp(state.bird.velocity / 12, -1.2, 1.2);
 
     const now = performance.now();
     if (now - state.lastSpawn >= spawnDelay) {
@@ -256,18 +386,22 @@ function updateGame() {
             pipe.scored = true;
             state.score += 1;
             scoreEl.textContent = String(state.score);
+            spawnParticles(state.bird.x + 40, state.bird.y - 10, '#facc15', 12);
             playSound('score');
         }
     }
 
     state.pipes = state.pipes.filter((pipe) => pipe.x + pipe.width > -20);
+    updateParticles();
 
     if (checkCollision()) {
         state.over = true;
         state.best = Math.max(state.best, state.score);
         localStorage.setItem('crazybird-best', String(state.best));
         bestEl.textContent = String(state.best);
+        spawnParticles(state.bird.x, state.bird.y, '#f87171', 20);
         playSound('hit');
+        stopBackgroundMusic();
         overlay.classList.add('visible');
         overlay.innerHTML = `
             <div class="panel">
@@ -278,8 +412,7 @@ function updateGame() {
             </div>
         `;
         document.getElementById('startButton').addEventListener('click', () => {
-            resetGame();
-            startGame();
+            showStartMenu();
         });
     }
 }
@@ -378,39 +511,53 @@ function drawPipes() {
 }
 
 function drawBird() {
-    const { x, y, radius } = state.bird;
+    const { x, y, radius, wingPhase, tilt } = state.bird;
+    const wingLift = Math.sin(wingPhase) * (radius * 0.8);
+    const bodyTilt = tilt;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(bodyTilt * 0.5);
 
     ctx.fillStyle = '#ffd166';
     ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, radius, radius * 0.9, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = '#f4b942';
     ctx.beginPath();
-    ctx.ellipse(x - radius * 0.52, y + radius * 0.13, radius * 0.87, radius * 0.52, 0, 0, Math.PI * 2);
+    ctx.ellipse(-radius * 0.46, radius * 0.16, radius * 0.85, radius * 0.46, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#fff4c2';
+    ctx.fillStyle = '#fff6d6';
     ctx.beginPath();
-    ctx.ellipse(x - radius * 0.04, y + radius * 0.17, radius * 0.43, radius * 0.66, 0, 0, Math.PI * 2);
+    ctx.ellipse(radius * 0.1, radius * 0.18, radius * 0.42, radius * 0.7, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = '#ff8f1f';
     ctx.beginPath();
-    ctx.moveTo(x + radius * 0.78, y + radius * 0.09);
-    ctx.lineTo(x + radius * 1.47, y + radius * 0.26);
-    ctx.lineTo(x + radius * 0.78, y + radius * 0.52);
+    ctx.moveTo(radius * 0.9, 0.1 * radius);
+    ctx.lineTo(radius * 1.65, 0.3 * radius);
+    ctx.lineTo(radius * 0.92, 0.55 * radius);
     ctx.closePath();
     ctx.fill();
 
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath();
+    ctx.ellipse(-radius * 0.14, -radius * 0.1, radius * 0.8, radius * 0.58, Math.PI * 0.2 + wingLift * 0.02, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.fillStyle = '#fff';
-    ctx.fillRect(x + radius * 0.38, y - radius * 0.22, radius * 0.35, radius * 0.35);
+    ctx.fillRect(radius * 0.3, -radius * 0.18, radius * 0.32, radius * 0.32);
     ctx.fillStyle = '#111827';
-    ctx.fillRect(x + radius * 0.48, y - radius * 0.13, radius * 0.17, radius * 0.17);
+    ctx.fillRect(radius * 0.42, -radius * 0.09, radius * 0.14, radius * 0.14);
+
+    ctx.restore();
 }
 
 function draw() {
     drawBackground();
+    drawParticles();
     drawPipes();
     drawBird();
 }
@@ -425,15 +572,27 @@ function toggleSound() {
     state.muted = !state.muted;
     soundToggle.textContent = state.muted ? '🔇' : '🔊';
     soundToggle.setAttribute('aria-pressed', String(state.muted));
-    if (!state.muted) {
-        ensureAudio();
+
+    if (state.muted) {
+        stopBackgroundMusic();
+    } else if (state.started && !state.paused && !state.over) {
+        startBackgroundMusic();
     }
 }
 
 window.addEventListener('keydown', (event) => {
     if (event.code === 'Space' || event.code === 'ArrowUp') {
         event.preventDefault();
-        flap();
+        if (state.started && !state.over) {
+            flap();
+        } else {
+            showStartMenu();
+        }
+    }
+
+    if (event.code === 'KeyP') {
+        event.preventDefault();
+        pauseGame();
     }
 });
 
@@ -445,10 +604,18 @@ window.addEventListener('resize', () => {
     }
 });
 
-canvas.addEventListener('pointerdown', flap);
+canvas.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    if (state.started && !state.over) {
+        flap();
+    } else {
+        showStartMenu();
+    }
+});
+pauseButton.addEventListener('click', pauseGame);
 soundToggle.addEventListener('click', toggleSound);
 resizeCanvas();
 updateSpeedHud();
 bestEl.textContent = String(state.best);
-resetGame();
+showStartMenu();
 requestAnimationFrame(tick);

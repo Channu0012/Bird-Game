@@ -114,19 +114,31 @@ button {
     color: #f8fafc;
 }
 
+.pause-button,
 .sound-toggle {
-    width: 42px;
-    height: 42px;
     border: none;
-    border-radius: 50%;
+    border-radius: 999px;
     background: linear-gradient(135deg, #60a5fa, #8b5cf6);
     color: white;
     cursor: pointer;
     box-shadow: 0 10px 18px rgba(96, 165, 250, 0.36);
-    font-size: 1.15rem;
     transition: transform 0.18s ease, filter 0.18s ease;
 }
 
+.pause-button {
+    padding: 8px 14px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+}
+
+.sound-toggle {
+    width: 42px;
+    height: 42px;
+    font-size: 1.15rem;
+}
+
+.pause-button:hover,
 .sound-toggle:hover {
     transform: translateY(-1px) scale(1.04);
     filter: brightness(1.08);
@@ -211,6 +223,15 @@ canvas {
     font-size: clamp(0.96rem, 2vw, 1.18rem);
 }
 
+.difficulty-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(88px, 1fr));
+    gap: 10px;
+    margin: 10px 0 18px;
+}
+
+.difficulty-btn,
 .panel button,
 #startButton {
     position: relative;
@@ -218,9 +239,9 @@ canvas {
     border-radius: 999px;
     background: linear-gradient(135deg, #60a5fa, #8b5cf6);
     color: white;
-    padding: 12px 30px;
-    min-width: 176px;
-    font-size: 1.02rem;
+    padding: 12px 18px;
+    min-width: 90px;
+    font-size: 0.94rem;
     font-weight: 800;
     letter-spacing: 0.06em;
     cursor: pointer;
@@ -228,11 +249,24 @@ canvas {
     transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
+.difficulty-btn.active {
+    background: linear-gradient(135deg, #22c55e, #14b8a6);
+}
+
+.difficulty-btn:hover,
 .panel button:hover,
 #startButton:hover {
     transform: translateY(-1px) scale(1.02);
     box-shadow: 0 18px 28px rgba(139, 92, 246, 0.42);
     filter: brightness(1.05);
+}
+
+.menu-note {
+    position: relative;
+    margin-top: 8px;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    opacity: 0.9;
 }
 
 @media (max-width: 760px) {
@@ -266,6 +300,11 @@ canvas {
         padding: 6px 9px;
     }
 
+    .pause-button {
+        padding: 7px 11px;
+        font-size: 0.74rem;
+    }
+
     .sound-toggle {
         width: 38px;
         height: 38px;
@@ -282,7 +321,12 @@ canvas {
         padding: 22px 16px 20px;
     }
 
+    .difficulty-row {
+        grid-template-columns: 1fr;
+    }
+
     .panel button,
+    .difficulty-btn,
     #startButton {
         width: 100%;
         min-width: 0;
