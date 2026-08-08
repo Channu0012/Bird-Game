@@ -1,28 +1,48 @@
 # Crazy Bird Game
 
-This is a simple and fun flying game made with Python and Tkinter.
+This is a colorful bird game built for fun, learning, and browser deployment.
 
-You control a bird and try to pass through the pipes without crashing. Every time you get through a pipe, your score goes up. The game also keeps your best score.
+The player controls a flying bird and must pass through gaps in the pipes without crashing. Every successful pass adds to the score, and the best score is saved in the browser.
 
-## How to play
+## Game features
 
-- Press the Space key or click the mouse to make the bird flap
-- Avoid the pipes
-- Try to get the highest score possible
+- smooth flying controls
+- pipe obstacle system
+- score and best-score tracking
+- start screen and restart flow
+- modern neon-inspired design
+- mobile-friendly browser gameplay
 
-## Run the game
+## Run locally
+
+### Web version
+
+Open the project folder in a browser, or run a local server:
+
+```bash
+python -m http.server 8000
+```
+
+Then open:
+
+```text
+http://localhost:8000
+```
+
+### Desktop version
 
 ```bash
 python practice.py
 ```
 
-## Game features
+## Deploy to GitHub Pages
 
-- colorful background
-- smooth bird movement
-- pipe obstacles
-- score tracking
-- best score tracking
-- start screen and game over screen
+Because this version is browser-based, it is easy to deploy on GitHub Pages:
 
-This project is made for learning game logic, Python drawing, and simple animation.
+1. Push the repository to GitHub
+2. Go to the repository settings
+3. Open Pages
+4. Select the main branch and root folder
+5. Save and open the live URL
+
+This project is built as a lightweight web game and is ready for simple static hosting.

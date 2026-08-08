@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crazy Bird</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand">Crazy Bird</div>
+        <div class="hud">
+          <span>Score: <strong id="score">0</strong></span>
+          <span>Best: <strong id="best">0</strong></span>
+        </div>
+      </header>
+
+      <main class="game-card">
+        <canvas id="gameCanvas" width="900" height="620" aria-label="Crazy Bird game"></canvas>
+        <div id="overlay" class="overlay visible">
+          <div class="panel">
+            <h1>Crazy Bird</h1>
+            <p>Press space or click to flap</p>
+            <button id="startButton">Play</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
