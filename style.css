@@ -1,14 +1,17 @@
 :root {
-    --bg-1: #070b17;
-    --bg-2: #111d36;
-    --panel: rgba(13, 21, 39, 0.82);
-    --panel-border: rgba(156, 163, 175, 0.35);
+    --bg-1: #040915;
+    --bg-2: #0b1730;
+    --card: rgba(10, 18, 33, 0.76);
+    --card-border: rgba(125, 211, 252, 0.35);
+    --panel: rgba(15, 23, 42, 0.88);
     --glow: #7dd3fc;
     --text: #edf6ff;
     --gold: #facc15;
     --accent: #60a5fa;
+    --purple: #8b5cf6;
     --green: #4ade80;
     --danger: #f87171;
+    --shadow: rgba(14, 116, 144, 0.28);
 }
 
 * {
@@ -20,7 +23,7 @@ body {
     margin: 0;
     min-height: 100%;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: radial-gradient(circle at top, #1a2a52 0%, var(--bg-1) 38%, #040811 100%);
+    background: radial-gradient(circle at top, #243d7a 0%, var(--bg-2) 28%, var(--bg-1) 100%);
     color: var(--text);
 }
 
@@ -28,71 +31,137 @@ body {
     display: grid;
     place-items: center;
     min-height: 100vh;
-    padding: 24px;
-    overflow-x: hidden;
+    padding: 14px;
+    overflow: hidden;
+}
+
+button {
+    font: inherit;
 }
 
 .page-shell {
-    width: min(960px, calc(100vw - 24px));
+    width: min(100vw - 16px, 1100px);
+    height: min(100vh - 18px, 760px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 14px;
-    padding: 0 8px;
+    gap: 12px;
+    padding: 0 10px;
+}
+
+.brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.brand-badge {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+    box-shadow: 0 10px 20px rgba(96, 165, 250, 0.4);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: #fff;
 }
 
 .brand {
-    font-size: clamp(1.5rem, 3vw, 2.4rem);
-    font-weight: 800;
+    font-size: clamp(1.3rem, 2vw, 2.2rem);
+    font-weight: 900;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #f8fbff;
     text-shadow: 0 0 18px rgba(125, 211, 252, 0.9);
+    white-space: nowrap;
 }
 
 .hud {
     display: flex;
-    gap: 18px;
-    font-size: 1.06rem;
-    font-weight: 700;
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid var(--panel-border);
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid var(--card-border);
     border-radius: 999px;
-    padding: 10px 18px;
+    padding: 8px 12px;
     box-shadow: 0 8px 28px rgba(96, 165, 250, 0.18);
+}
+
+.hud-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.13);
+    color: #e2e8f0;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.hud-pill strong {
+    color: #f8fafc;
+}
+
+.sound-toggle {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa, #8b5cf6);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 10px 18px rgba(96, 165, 250, 0.36);
+    font-size: 1.15rem;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.sound-toggle:hover {
+    transform: translateY(-1px) scale(1.04);
+    filter: brightness(1.08);
 }
 
 .game-card {
     position: relative;
+    flex: 1;
+    min-height: 0;
     width: 100%;
-    border-radius: 24px;
-    padding: clamp(8px, 2vw, 14px);
-    background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(30, 41, 59, 0.92));
+    border-radius: 26px;
+    padding: clamp(8px, 1.4vw, 14px);
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.96), rgba(30, 41, 59, 0.92));
     border: 1px solid rgba(125, 211, 252, 0.35);
-    box-shadow: 0 20px 45px rgba(59, 130, 246, 0.2), 0 0 30px rgba(125, 211, 252, 0.18);
+    box-shadow: 0 24px 52px rgba(59, 130, 246, 0.2), 0 0 32px rgba(125, 211, 252, 0.18);
 }
 
 canvas {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     max-width: 100%;
-    aspect-ratio: 900 / 620;
     border-radius: 18px;
     background: linear-gradient(180deg, #0b1120, #1d4ed8 28%, #60a5fa 58%, #7dd3fc 100%);
     border: 2px solid rgba(255, 255, 255, 0.12);
     touch-action: manipulation;
+    user-select: none;
 }
 
 .overlay {
     position: absolute;
-    inset: 14px;
+    inset: clamp(8px, 1.4vw, 14px);
     display: grid;
     place-items: center;
-    background: rgba(2, 6, 23, 0.35);
+    background: rgba(2, 6, 23, 0.38);
     border-radius: 18px;
     opacity: 0;
     pointer-events: none;
@@ -105,91 +174,117 @@ canvas {
 }
 
 .panel {
-    width: min(420px, 82%);
-    padding: 26px 22px;
+    position: relative;
+    width: min(500px, 84%);
+    padding: 28px 22px 24px;
     text-align: center;
-    background: rgba(15, 23, 42, 0.82);
+    background: rgba(15, 23, 42, 0.86);
     border: 1px solid rgba(125, 211, 252, 0.35);
-    border-radius: 22px;
-    box-shadow: 0 18px 35px rgba(14, 116, 144, 0.28);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px var(--shadow);
+    overflow: hidden;
+}
+
+.panel-glow {
+    position: absolute;
+    inset: -18% -10% auto auto;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.38), transparent 65%);
+    pointer-events: none;
 }
 
 .panel h1 {
+    position: relative;
     margin: 0 0 8px;
-    font-size: clamp(2rem, 5vw, 3rem);
-    letter-spacing: 0.06em;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #f8fafc;
 }
 
 .panel p {
+    position: relative;
     margin: 0 0 20px;
     color: #dbeafe;
-    font-size: 1.08rem;
+    font-size: clamp(0.96rem, 2vw, 1.18rem);
 }
 
-button {
+.panel button,
+#startButton {
+    position: relative;
     border: none;
     border-radius: 999px;
     background: linear-gradient(135deg, #60a5fa, #8b5cf6);
     color: white;
-    padding: 12px 28px;
-    font-size: 1.05rem;
+    padding: 12px 30px;
+    min-width: 176px;
+    font-size: 1.02rem;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     cursor: pointer;
-    box-shadow: 0 14px 24px rgba(96, 165, 250, 0.4);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 14px 24px rgba(96, 165, 250, 0.38);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
-button:hover {
+.panel button:hover,
+#startButton:hover {
     transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 18px 28px rgba(139, 92, 246, 0.4);
+    box-shadow: 0 18px 28px rgba(139, 92, 246, 0.42);
+    filter: brightness(1.05);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
     body {
-        padding: 12px;
+        padding: 10px;
     }
 
     .page-shell {
-        width: min(100%, calc(100vw - 16px));
+        width: min(100vw - 12px, 100%);
+        height: min(100vh - 12px, 100%);
     }
 
     .topbar {
         flex-direction: column;
-        gap: 12px;
         align-items: stretch;
+        padding: 0;
+    }
+
+    .brand-wrap {
+        justify-content: center;
     }
 
     .hud {
-        width: 100%;
-        justify-content: space-between;
-        padding: 10px 14px;
-        font-size: 0.95rem;
+        justify-content: center;
+        border-radius: 22px;
+        padding: 8px 10px;
     }
 
-    .panel {
-        width: min(86%, 360px);
-        padding: 22px 16px;
+    .hud-pill {
+        font-size: 0.76rem;
+        padding: 6px 9px;
+    }
+
+    .sound-toggle {
+        width: 38px;
+        height: 38px;
     }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
     .brand {
         letter-spacing: 0.05em;
     }
 
-    .hud {
-        gap: 10px;
-        font-size: 0.82rem;
+    .panel {
+        width: min(88%, 360px);
+        padding: 22px 16px 20px;
     }
 
-    .panel p {
-        font-size: 0.96rem;
-    }
-
-    button {
+    .panel button,
+    #startButton {
         width: 100%;
+        min-width: 0;
     }
 }

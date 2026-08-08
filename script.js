@@ -2,8 +2,10 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const bestEl = document.getElementById('best');
+const speedLabel = document.getElementById('speedLabel');
 const overlay = document.getElementById('overlay');
 const startButton = document.getElementById('startButton');
+const soundToggle = document.getElementById('soundToggle');
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 620;
@@ -17,22 +19,117 @@ let pipeSpeed = 3.9;
 let pipeWidth = 95;
 let pipeGap = 210;
 let spawnDelay = 1550;
+let audioContext = null;
 
 const clamp = (min, value, max) => Math.min(Math.max(value, min), max);
 
+const state = {
+    started: false,
+    over: false,
+    score: 0,
+    best: Number(localStorage.getItem('crazybird-best') || 0),
+    lastSpawn: 0,
+    pipes: [],
+    muted: false,
+    bird: {
+        x: 150,
+        y: BASE_HEIGHT / 2,
+        radius: 23,
+        velocity: 0,
+    },
+};
+
+function updateSpeedHud() {
+    const multiplier = 1 + Math.min(3.5, state.score * 0.08);
+    speedLabel.textContent = `${multiplier.toFixed(1)}x`;
+}
+
+function ensureAudio() {
+    if (!audioContext) {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtor) return null;
+        audioContext = new AudioCtor();
+    }
+
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    return audioContext;
+}
+
+function playTone({ frequency, duration, type = 'sine', volume = 0.04, slide = 0 }) {
+    const context = ensureAudio();
+    if (!context || state.muted) return;
+
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+    if (slide !== 0) {
+        oscillator.frequency.exponentialRampToValueAtTime(Math.max(40, frequency + slide), context.currentTime + duration);
+    }
+
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(volume, context.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + duration);
+}
+
+function playSound(type) {
+    if (state.muted) return;
+
+    if (type === 'flap') {
+        playTone({ frequency: 420, duration: 0.07, type: 'triangle', volume: 0.05, slide: 130 });
+        return;
+    }
+
+    if (type === 'score') {
+        playTone({ frequency: 780, duration: 0.08, type: 'square', volume: 0.04, slide: 220 });
+        return;
+    }
+
+    if (type === 'hit') {
+        playTone({ frequency: 180, duration: 0.16, type: 'sawtooth', volume: 0.06, slide: -140 });
+        return;
+    }
+
+    if (type === 'start') {
+        playTone({ frequency: 620, duration: 0.12, type: 'triangle', volume: 0.05, slide: 180 });
+        playTone({ frequency: 900, duration: 0.1, type: 'triangle', volume: 0.04, slide: 250 });
+    }
+}
+
 function resizeCanvas() {
-    const maxWidth = Math.min(window.innerWidth - 32, BASE_WIDTH);
-    const nextWidth = Math.max(280, maxWidth);
-    const nextHeight = nextWidth * (BASE_HEIGHT / BASE_WIDTH);
+    const bounds = document.querySelector('.game-card').getBoundingClientRect();
+    let nextWidth = Math.max(280, Math.min(bounds.width, 1100));
+    let nextHeight = Math.min(bounds.height, 720);
+
+    if (nextHeight <= 0) {
+        nextHeight = window.innerHeight * 0.72;
+    }
+
+    const aspectRatio = BASE_WIDTH / BASE_HEIGHT;
+    const fitByWidth = nextWidth / aspectRatio;
+    if (fitByWidth <= nextHeight) {
+        nextHeight = fitByWidth;
+    } else {
+        nextWidth = nextHeight * aspectRatio;
+    }
 
     width = nextWidth;
     height = nextHeight;
     groundY = height * 0.87;
     gravity = 0.48 * (height / BASE_HEIGHT);
     flapPower = -8.7 * (height / BASE_HEIGHT);
-    pipeSpeed = 3.9 * (height / BASE_HEIGHT);
-    pipeWidth = Math.max(60, width * 0.105);
-    pipeGap = clamp(160, height * 0.34, 220);
+    pipeSpeed = (3.6 + state.score * 0.12) * (height / BASE_HEIGHT);
+    pipeWidth = Math.max(58, width * 0.105);
+    pipeGap = clamp(150, height * 0.34, 220);
     spawnDelay = 1550;
 
     const dpr = window.devicePixelRatio || 1;
@@ -43,26 +140,19 @@ function resizeCanvas() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-const state = {
-    started: false,
-    over: false,
-    score: 0,
-    best: Number(localStorage.getItem('crazybird-best') || 0),
-    lastSpawn: 0,
-    pipes: [],
-    bird: {
-        x: 150,
-        y: BASE_HEIGHT / 2,
-        radius: 23,
-        velocity: 0,
-    },
-};
-
 function resetBird() {
     state.bird.x = width * 0.17;
-    state.bird.y = height / 2;
+    state.bird.y = height * 0.48;
     state.bird.radius = Math.max(18, height * 0.037);
     state.bird.velocity = 0;
+}
+
+function applyDifficulty() {
+    const difficulty = 1 + Math.min(3.2, state.score * 0.08);
+    pipeSpeed = (3.6 * difficulty) * (height / BASE_HEIGHT);
+    pipeGap = clamp(148, 210 - state.score * 1.8, 220);
+    spawnDelay = Math.max(720, 1500 - state.score * 25);
+    updateSpeedHud();
 }
 
 function resetGame() {
@@ -72,20 +162,23 @@ function resetGame() {
     state.over = false;
     state.started = false;
     resetBird();
+    applyDifficulty();
     scoreEl.textContent = '0';
     bestEl.textContent = String(state.best);
     overlay.classList.add('visible');
     overlay.innerHTML = `
-    <div class="panel">
-      <h1>Crazy Bird</h1>
-      <p>Press space or click to flap</p>
-      <button id="startButton">Play</button>
-    </div>
-  `;
+        <div class="panel">
+            <div class="panel-glow"></div>
+            <h1>Crazy Bird</h1>
+            <p>Tap, click, or press space to flap</p>
+            <button id="startButton" type="button">Play</button>
+        </div>
+    `;
     document.getElementById('startButton').addEventListener('click', startGame);
 }
 
 function startGame() {
+    ensureAudio();
     state.started = true;
     state.over = false;
     scoreEl.textContent = '0';
@@ -96,9 +189,13 @@ function startGame() {
     state.score = 0;
     state.lastSpawn = 0;
     state.bird.velocity = flapPower;
+    playSound('start');
+    applyDifficulty();
 }
 
 function flap() {
+    ensureAudio();
+
     if (!state.started) {
         startGame();
     } else if (state.over) {
@@ -106,11 +203,12 @@ function flap() {
         startGame();
     } else {
         state.bird.velocity = flapPower;
+        playSound('flap');
     }
 }
 
 function createPipe() {
-    const upperLimit = groundY - 100;
+    const upperLimit = groundY - 110;
     const gapTop = 70 + Math.random() * (upperLimit - pipeGap - 70);
 
     state.pipes.push({
@@ -141,6 +239,7 @@ function checkCollision() {
 function updateGame() {
     if (!state.started || state.over) return;
 
+    applyDifficulty();
     state.bird.velocity += gravity;
     state.bird.y += state.bird.velocity;
 
@@ -157,6 +256,7 @@ function updateGame() {
             pipe.scored = true;
             state.score += 1;
             scoreEl.textContent = String(state.score);
+            playSound('score');
         }
     }
 
@@ -167,14 +267,16 @@ function updateGame() {
         state.best = Math.max(state.best, state.score);
         localStorage.setItem('crazybird-best', String(state.best));
         bestEl.textContent = String(state.best);
+        playSound('hit');
         overlay.classList.add('visible');
         overlay.innerHTML = `
-      <div class="panel">
-        <h1>Game Over</h1>
-        <p>Score: ${state.score}</p>
-        <button id="startButton">Restart</button>
-      </div>
-    `;
+            <div class="panel">
+                <div class="panel-glow"></div>
+                <h1>Game Over</h1>
+                <p>Score: ${state.score}</p>
+                <button id="startButton" type="button">Restart</button>
+            </div>
+        `;
         document.getElementById('startButton').addEventListener('click', () => {
             resetGame();
             startGame();
@@ -319,6 +421,15 @@ function tick() {
     requestAnimationFrame(tick);
 }
 
+function toggleSound() {
+    state.muted = !state.muted;
+    soundToggle.textContent = state.muted ? '🔇' : '🔊';
+    soundToggle.setAttribute('aria-pressed', String(state.muted));
+    if (!state.muted) {
+        ensureAudio();
+    }
+}
+
 window.addEventListener('keydown', (event) => {
     if (event.code === 'Space' || event.code === 'ArrowUp') {
         event.preventDefault();
@@ -335,8 +446,9 @@ window.addEventListener('resize', () => {
 });
 
 canvas.addEventListener('pointerdown', flap);
-startButton.addEventListener('click', startGame);
+soundToggle.addEventListener('click', toggleSound);
 resizeCanvas();
+updateSpeedHud();
 bestEl.textContent = String(state.best);
 resetGame();
 requestAnimationFrame(tick);
