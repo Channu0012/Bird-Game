@@ -9,6 +9,7 @@ const pauseButton = document.getElementById('pauseButton');
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 620;
+const LEADERBOARD_KEY = 'crazybird-leaderboard';
 const DIFFICULTY_CONFIG = {
     easy: { label: 'Easy', gravity: 0.48, flapPower: -8.7, pipeSpeed: 3.6, pipeGap: 210, spawnDelay: 1550 },
     medium: { label: 'Medium', gravity: 0.52, flapPower: -9.1, pipeSpeed: 4.2, pipeGap: 188, spawnDelay: 1350 },
@@ -26,8 +27,54 @@ let pipeGap = 210;
 let spawnDelay = 1550;
 let audioContext = null;
 let musicLoop = null;
+let splashTimer = null;
 
 const clamp = (min, value, max) => Math.min(Math.max(value, min), max);
+
+function loadLeaderboard() {
+    try {
+        const raw = localStorage.getItem(LEADERBOARD_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveScoreToLeaderboard(score) {
+    const leaderboard = loadLeaderboard();
+    const stamp = new Date().toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+    });
+
+    leaderboard.push({ score, date: stamp });
+    leaderboard.sort((a, b) => b.score - a.score);
+
+    const topFive = leaderboard.slice(0, 5);
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(topFive));
+    return topFive;
+}
+
+function renderLeaderboardMarkup(limit = 5) {
+    const entries = loadLeaderboard().slice(0, limit);
+    const rows = entries.length
+        ? entries.map((entry, index) => `
+            <li>
+                <span>#${index + 1}</span>
+                <strong>${entry.score}</strong>
+                <small>${entry.date}</small>
+            </li>
+        `).join('')
+        : '<li class="empty">No runs yet</li>';
+
+    return `
+        <div class="leaderboard-box">
+            <h2>Top runs</h2>
+            <ol class="leaderboard-list">${rows}</ol>
+        </div>
+    `;
+}
 
 const state = {
     started: false,
@@ -35,9 +82,13 @@ const state = {
     paused: false,
     score: 0,
     best: Number(localStorage.getItem('crazybird-best') || 0),
+    combo: 0,
+    lastScoreTime: 0,
     lastSpawn: 0,
     pipes: [],
     particles: [],
+    floatingTexts: [],
+    leaderboard: loadLeaderboard(),
     muted: false,
     difficulty: 'easy',
     bird: {
@@ -206,6 +257,27 @@ function updateParticles() {
     });
 }
 
+function spawnFloatingText(x, y, text, color = '#fff7c2') {
+    state.floatingTexts.push({
+        x,
+        y,
+        text,
+        color,
+        life: 48,
+        vy: -0.8,
+    });
+}
+
+function updateFloatingTexts() {
+    state.floatingTexts = state.floatingTexts.filter((item) => {
+        item.x += 0.2;
+        item.y += item.vy;
+        item.vy *= 0.98;
+        item.life -= 1;
+        return item.life > 0;
+    });
+}
+
 function drawParticles() {
     for (const particle of state.particles) {
         ctx.save();
@@ -216,6 +288,17 @@ function drawParticles() {
         ctx.fill();
         ctx.restore();
     }
+}
+
+function drawFloatingTexts() {
+    ctx.save();
+    for (const item of state.floatingTexts) {
+        ctx.globalAlpha = Math.max(0, item.life / 48);
+        ctx.font = 'bold 22px Segoe UI';
+        ctx.fillStyle = item.color;
+        ctx.fillText(item.text, item.x, item.y);
+    }
+    ctx.restore();
 }
 
 function applyDifficulty() {
@@ -234,6 +317,31 @@ function setDifficulty(level) {
     applyDifficulty();
 }
 
+function showLoadingSplash() {
+    if (splashTimer) {
+        clearTimeout(splashTimer);
+    }
+
+    state.started = false;
+    state.over = false;
+    state.paused = false;
+    stopBackgroundMusic();
+    overlay.classList.add('visible');
+    overlay.innerHTML = `
+        <div class="panel splash-panel">
+            <div class="panel-glow"></div>
+            <div class="splash-logo">CB</div>
+            <h1>Crazy Bird</h1>
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <p>Loading sky run...</p>
+        </div>
+    `;
+
+    splashTimer = setTimeout(() => {
+        showStartMenu();
+    }, 1800);
+}
+
 function showStartMenu() {
     state.started = false;
     state.over = false;
@@ -242,8 +350,12 @@ function showStartMenu() {
     resetBird();
     state.pipes = [];
     state.score = 0;
+    state.combo = 0;
+    state.lastScoreTime = 0;
+    state.floatingTexts = [];
     scoreEl.textContent = '0';
     bestEl.textContent = String(state.best);
+    state.leaderboard = loadLeaderboard();
     overlay.classList.add('visible');
     overlay.innerHTML = `
         <div class="panel">
@@ -255,6 +367,8 @@ function showStartMenu() {
                     .map(([key, config]) => `<button class="difficulty-btn ${state.difficulty === key ? 'active' : ''}" data-difficulty="${key}" type="button">${config.label}</button>`)
                     .join('')}
             </div>
+            ${renderLeaderboardMarkup(5)}
+            <button id="startButton" type="button">Play</button>
             <div class="menu-note">Tap, click, or press space to flap</div>
         </div>
     `;
@@ -265,6 +379,13 @@ function showStartMenu() {
             startGame(button.dataset.difficulty);
         });
     });
+
+    const startButton = document.getElementById('startButton');
+    if (startButton) {
+        startButton.addEventListener('click', () => {
+            startGame(state.difficulty);
+        });
+    }
 }
 
 function startGame(selectedDifficulty = state.difficulty) {
@@ -273,9 +394,12 @@ function startGame(selectedDifficulty = state.difficulty) {
     state.over = false;
     state.paused = false;
     state.score = 0;
+    state.combo = 0;
+    state.lastScoreTime = 0;
     state.lastSpawn = 0;
     state.pipes = [];
     state.particles = [];
+    state.floatingTexts = [];
     setDifficulty(selectedDifficulty);
     scoreEl.textContent = '0';
     overlay.classList.remove('visible');
@@ -337,14 +461,17 @@ function flap() {
 
 function createPipe() {
     const upperLimit = groundY - 110;
-    const gapTop = 70 + Math.random() * (upperLimit - pipeGap - 70);
+    const isBossPipe = state.score > 4 && Math.random() < 0.18;
+    const gapHeight = isBossPipe ? Math.max(128, pipeGap * 0.75) : pipeGap;
+    const gapTop = 70 + Math.random() * (upperLimit - gapHeight - 70);
 
     state.pipes.push({
         x: width + 50,
-        width: pipeWidth,
+        width: isBossPipe ? pipeWidth * 1.45 : pipeWidth,
         gapTop,
-        gapHeight: pipeGap,
+        gapHeight,
         scored: false,
+        isBoss: isBossPipe,
     });
 }
 
@@ -384,21 +511,32 @@ function updateGame() {
 
         if (!pipe.scored && pipe.x + pipe.width < state.bird.x) {
             pipe.scored = true;
+            const now = performance.now();
+            const comboValue = now - state.lastScoreTime < 1800 ? state.combo + 1 : 1;
+            state.combo = comboValue;
+            state.lastScoreTime = now;
             state.score += 1;
             scoreEl.textContent = String(state.score);
             spawnParticles(state.bird.x + 40, state.bird.y - 10, '#facc15', 12);
+            if (comboValue > 1) {
+                spawnFloatingText(state.bird.x + 30, state.bird.y - 20, `x${comboValue} combo`, '#facc15');
+            } else {
+                spawnFloatingText(state.bird.x + 20, state.bird.y - 20, '+1', '#fff7c2');
+            }
             playSound('score');
         }
     }
 
     state.pipes = state.pipes.filter((pipe) => pipe.x + pipe.width > -20);
     updateParticles();
+    updateFloatingTexts();
 
     if (checkCollision()) {
         state.over = true;
         state.best = Math.max(state.best, state.score);
         localStorage.setItem('crazybird-best', String(state.best));
         bestEl.textContent = String(state.best);
+        state.leaderboard = saveScoreToLeaderboard(state.score);
         spawnParticles(state.bird.x, state.bird.y, '#f87171', 20);
         playSound('hit');
         stopBackgroundMusic();
@@ -408,6 +546,7 @@ function updateGame() {
                 <div class="panel-glow"></div>
                 <h1>Game Over</h1>
                 <p>Score: ${state.score}</p>
+                ${renderLeaderboardMarkup(5)}
                 <button id="startButton" type="button">Restart</button>
             </div>
         `;
@@ -496,6 +635,35 @@ function drawPipes() {
     for (const pipe of state.pipes) {
         const { x, width: pipeLength, gapTop, gapHeight } = pipe;
 
+        if (pipe.isBoss) {
+            const bossDark = '#2b1d1d';
+            const bossMetal = '#cbd5e1';
+            const bossAccent = '#ef4444';
+
+            ctx.fillStyle = bossDark;
+            ctx.fillRect(x, 0, pipeLength, gapTop);
+            ctx.fillRect(x, gapTop + gapHeight, pipeLength, height - (gapTop + gapHeight) - 40);
+
+            ctx.fillStyle = '#475569';
+            ctx.fillRect(x - 10, gapTop - 26, pipeLength + 20, 24);
+            ctx.fillRect(x - 10, gapTop + gapHeight, pipeLength + 20, 24);
+
+            ctx.fillStyle = bossMetal;
+            ctx.fillRect(x + 12, gapTop - 16, pipeLength - 24, 12);
+            ctx.fillRect(x + 12, gapTop + gapHeight + 6, pipeLength - 24, 12);
+
+            ctx.fillStyle = bossAccent;
+            ctx.fillRect(x + 18, gapTop - 8, 18, 10);
+            ctx.fillRect(x + pipeLength - 36, gapTop - 8, 18, 10);
+            ctx.fillRect(x + 18, gapTop + gapHeight + 12, 18, 10);
+            ctx.fillRect(x + pipeLength - 36, gapTop + gapHeight + 12, 18, 10);
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(x + pipeLength * 0.3, gapTop - 10, 8, 8);
+            ctx.fillRect(x + pipeLength * 0.7, gapTop - 10, 8, 8);
+            continue;
+        }
+
         ctx.fillStyle = '#4ade80';
         ctx.fillRect(x, 0, pipeLength, gapTop);
         ctx.fillRect(x, gapTop + gapHeight, pipeLength, height - (gapTop + gapHeight) - 40);
@@ -559,6 +727,7 @@ function draw() {
     drawBackground();
     drawParticles();
     drawPipes();
+    drawFloatingTexts();
     drawBird();
 }
 
@@ -617,5 +786,5 @@ soundToggle.addEventListener('click', toggleSound);
 resizeCanvas();
 updateSpeedHud();
 bestEl.textContent = String(state.best);
-showStartMenu();
+showLoadingSplash();
 requestAnimationFrame(tick);
