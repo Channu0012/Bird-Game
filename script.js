@@ -9,7 +9,6 @@ const pauseButton = document.getElementById('pauseButton');
 
 const BASE_WIDTH = 900;
 const BASE_HEIGHT = 620;
-const LEADERBOARD_KEY = 'crazybird-leaderboard';
 const DIFFICULTY_CONFIG = {
     easy: { label: 'Easy', gravity: 0.48, flapPower: -8.7, pipeSpeed: 3.6, pipeGap: 210, spawnDelay: 1550 },
     medium: { label: 'Medium', gravity: 0.52, flapPower: -9.1, pipeSpeed: 4.2, pipeGap: 188, spawnDelay: 1350 },
@@ -31,51 +30,6 @@ let splashTimer = null;
 
 const clamp = (min, value, max) => Math.min(Math.max(value, min), max);
 
-function loadLeaderboard() {
-    try {
-        const raw = localStorage.getItem(LEADERBOARD_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-        return [];
-    }
-}
-
-function saveScoreToLeaderboard(score) {
-    const leaderboard = loadLeaderboard();
-    const stamp = new Date().toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-    });
-
-    leaderboard.push({ score, date: stamp });
-    leaderboard.sort((a, b) => b.score - a.score);
-
-    const topFive = leaderboard.slice(0, 5);
-    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(topFive));
-    return topFive;
-}
-
-function renderLeaderboardMarkup(limit = 5) {
-    const entries = loadLeaderboard().slice(0, limit);
-    const rows = entries.length
-        ? entries.map((entry, index) => `
-            <li>
-                <span>#${index + 1}</span>
-                <strong>${entry.score}</strong>
-                <small>${entry.date}</small>
-            </li>
-        `).join('')
-        : '<li class="empty">No runs yet</li>';
-
-    return `
-        <div class="leaderboard-box">
-            <h2>Top runs</h2>
-            <ol class="leaderboard-list">${rows}</ol>
-        </div>
-    `;
-}
-
 const state = {
     started: false,
     over: false,
@@ -88,7 +42,6 @@ const state = {
     pipes: [],
     particles: [],
     floatingTexts: [],
-    leaderboard: loadLeaderboard(),
     muted: false,
     difficulty: 'easy',
     bird: {
@@ -355,7 +308,6 @@ function showStartMenu() {
     state.floatingTexts = [];
     scoreEl.textContent = '0';
     bestEl.textContent = String(state.best);
-    state.leaderboard = loadLeaderboard();
     overlay.classList.add('visible');
     overlay.innerHTML = `
         <div class="panel">
@@ -367,7 +319,6 @@ function showStartMenu() {
                     .map(([key, config]) => `<button class="difficulty-btn ${state.difficulty === key ? 'active' : ''}" data-difficulty="${key}" type="button">${config.label}</button>`)
                     .join('')}
             </div>
-            ${renderLeaderboardMarkup(5)}
             <button id="startButton" type="button">Play</button>
             <div class="menu-note">Tap, click, or press space to flap</div>
         </div>
@@ -536,7 +487,6 @@ function updateGame() {
         state.best = Math.max(state.best, state.score);
         localStorage.setItem('crazybird-best', String(state.best));
         bestEl.textContent = String(state.best);
-        state.leaderboard = saveScoreToLeaderboard(state.score);
         spawnParticles(state.bird.x, state.bird.y, '#f87171', 20);
         playSound('hit');
         stopBackgroundMusic();
@@ -546,7 +496,6 @@ function updateGame() {
                 <div class="panel-glow"></div>
                 <h1>Game Over</h1>
                 <p>Score: ${state.score}</p>
-                ${renderLeaderboardMarkup(5)}
                 <button id="startButton" type="button">Restart</button>
             </div>
         `;
