@@ -629,45 +629,74 @@ function drawPipes() {
 
 function drawBird() {
     const { x, y, radius, wingPhase, tilt } = state.bird;
-    const wingLift = Math.sin(wingPhase) * (radius * 0.8);
+    const wingLift = Math.sin(wingPhase) * (radius * 0.9);
     const bodyTilt = tilt;
 
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(bodyTilt * 0.5);
+    ctx.rotate(bodyTilt * 0.45);
 
-    ctx.fillStyle = '#ffd166';
+    const body = radius * 1.1;
+    const wing = radius * 1.4;
+
+    ctx.fillStyle = '#dfeaf6';
     ctx.beginPath();
-    ctx.ellipse(0, 0, radius, radius * 0.9, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 3, radius * 1.05, radius * 0.72, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#f4b942';
+    ctx.fillStyle = '#bfcfe0';
     ctx.beginPath();
-    ctx.ellipse(-radius * 0.46, radius * 0.16, radius * 0.85, radius * 0.46, 0, 0, Math.PI * 2);
+    ctx.ellipse(-radius * 0.16, 6, radius * 1.18, radius * 0.46, -0.65 + wingLift * 0.02, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#fff6d6';
+    ctx.fillStyle = '#f4f6fb';
     ctx.beginPath();
-    ctx.ellipse(radius * 0.1, radius * 0.18, radius * 0.42, radius * 0.7, 0, 0, Math.PI * 2);
+    ctx.moveTo(-radius * 0.8, -4);
+    ctx.quadraticCurveTo(-radius * 1.35, -radius * 0.9, -radius * 0.2, -radius * 0.3);
+    ctx.quadraticCurveTo(radius * 0.3, -radius * 0.8, radius * 0.9, -3);
+    ctx.quadraticCurveTo(radius * 0.52, -radius * 1.25, -radius * 0.8, -4);
     ctx.fill();
 
-    ctx.fillStyle = '#ff8f1f';
+    ctx.fillStyle = '#d7e3f0';
     ctx.beginPath();
-    ctx.moveTo(radius * 0.9, 0.1 * radius);
-    ctx.lineTo(radius * 1.65, 0.3 * radius);
-    ctx.lineTo(radius * 0.92, 0.55 * radius);
+    ctx.moveTo(-radius * 0.9, 2);
+    ctx.lineTo(-radius * 1.9, -2);
+    ctx.lineTo(-radius * 1.3, 5);
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = '#ffd166';
+    ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.ellipse(-radius * 0.14, -radius * 0.1, radius * 0.8, radius * 0.58, Math.PI * 0.2 + wingLift * 0.02, 0, Math.PI * 2);
+    ctx.arc(radius * 0.55, -radius * 0.2, radius * 0.38, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(radius * 0.3, -radius * 0.18, radius * 0.32, radius * 0.32);
-    ctx.fillStyle = '#111827';
-    ctx.fillRect(radius * 0.42, -radius * 0.09, radius * 0.14, radius * 0.14);
+    ctx.fillStyle = '#1b2433';
+    ctx.beginPath();
+    ctx.arc(radius * 0.68, -radius * 0.1, radius * 0.12, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffaf40';
+    ctx.beginPath();
+    ctx.moveTo(radius * 0.98, 0.05);
+    ctx.lineTo(radius * 1.7, 0.2);
+    ctx.lineTo(radius * 1.02, 0.5);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#6d7a8c';
+    ctx.beginPath();
+    ctx.moveTo(-radius * 0.8, 0);
+    ctx.lineTo(-radius * 1.5, radius * 0.45);
+    ctx.lineTo(-radius * 0.5, radius * 0.7);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.strokeStyle = '#8594a7';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-radius * 0.6, 0);
+    ctx.quadraticCurveTo(-radius * 0.2, -radius * 0.25, radius * 0.1, 0);
+    ctx.stroke();
 
     ctx.restore();
 }
@@ -722,12 +751,23 @@ window.addEventListener('resize', () => {
     }
 });
 
-canvas.addEventListener('pointerdown', (event) => {
+function handleGameTap(event) {
+    if (event && event.target && event.target.closest && event.target.closest('button')) {
+        return;
+    }
+
     event.preventDefault();
     if (state.started && !state.over) {
         flap();
     } else {
         showStartMenu();
+    }
+}
+
+canvas.addEventListener('pointerdown', handleGameTap);
+document.addEventListener('pointerdown', (event) => {
+    if (event.target === document.body || event.target === document.documentElement || event.target === canvas) {
+        handleGameTap(event);
     }
 });
 pauseButton.addEventListener('click', pauseGame);
