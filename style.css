@@ -38,24 +38,28 @@ button {
 }
 
 .page-shell {
+    position: relative;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    display: block;
     background: radial-gradient(circle at top, #243d7a 0%, var(--bg-2) 28%, var(--bg-1) 100%);
+    overflow: hidden;
 }
 
 .topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 12px 18px 10px;
-    background: rgba(4, 9, 21, 0.18);
-    backdrop-filter: blur(8px);
-    position: relative;
-    z-index: 2;
+    padding: 14px 20px 10px;
+    background: linear-gradient(to bottom, rgba(2, 6, 23, 0.38), rgba(2, 6, 23, 0));
+    backdrop-filter: blur(4px);
+    z-index: 3;
+    pointer-events: none;
 }
 
 .brand-wrap {
@@ -63,6 +67,7 @@ button {
     align-items: center;
     gap: 10px;
     min-width: 0;
+    pointer-events: auto;
 }
 
 .brand-badge {
@@ -94,11 +99,12 @@ button {
     gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-end;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.82);
     border: 1px solid var(--card-border);
     border-radius: 999px;
     padding: 8px 12px;
     box-shadow: 0 8px 28px rgba(96, 165, 250, 0.18);
+    pointer-events: auto;
 }
 
 .hud-pill {
@@ -148,10 +154,10 @@ button {
 }
 
 .game-card {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    width: 100%;
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
     border-radius: 0;
     padding: 0;
     background: transparent;

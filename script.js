@@ -584,46 +584,41 @@ function drawPipes() {
     for (const pipe of state.pipes) {
         const { x, width: pipeLength, gapTop, gapHeight } = pipe;
 
+        const topHeight = gapTop;
+        const bottomY = gapTop + gapHeight;
+        const bottomHeight = height - bottomY - 40;
+
+        const pipeBody = pipe.isBoss ? '#3b3d47' : '#7c8b9b';
+        const pipeBodyDark = pipe.isBoss ? '#1f2330' : '#5d6979';
+        const pipeCap = pipe.isBoss ? '#cfcfce' : '#b5c0cc';
+
+        ctx.fillStyle = pipeBodyDark;
+        ctx.fillRect(x, 0, pipeLength, topHeight);
+        ctx.fillRect(x, bottomY, pipeLength, bottomHeight);
+
+        ctx.fillStyle = pipeBody;
+        ctx.fillRect(x, 0, pipeLength, topHeight);
+        ctx.fillRect(x, bottomY, pipeLength, bottomHeight);
+
+        ctx.fillStyle = pipeCap;
+        ctx.fillRect(x - 8, topHeight - 18, pipeLength + 16, 18);
+        ctx.fillRect(x - 8, bottomY, pipeLength + 16, 18);
+
+        ctx.fillStyle = '#4a5565';
+        ctx.fillRect(x + 10, topHeight - 12, pipeLength - 20, 10);
+        ctx.fillRect(x + 10, bottomY + 4, pipeLength - 20, 10);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.14)';
+        ctx.fillRect(x + 8, 0, 5, topHeight);
+        ctx.fillRect(x + pipeLength - 13, bottomY, 5, bottomHeight);
+
         if (pipe.isBoss) {
-            const bossDark = '#2b1d1d';
-            const bossMetal = '#cbd5e1';
-            const bossAccent = '#ef4444';
-
-            ctx.fillStyle = bossDark;
-            ctx.fillRect(x, 0, pipeLength, gapTop);
-            ctx.fillRect(x, gapTop + gapHeight, pipeLength, height - (gapTop + gapHeight) - 40);
-
-            ctx.fillStyle = '#475569';
-            ctx.fillRect(x - 10, gapTop - 26, pipeLength + 20, 24);
-            ctx.fillRect(x - 10, gapTop + gapHeight, pipeLength + 20, 24);
-
-            ctx.fillStyle = bossMetal;
-            ctx.fillRect(x + 12, gapTop - 16, pipeLength - 24, 12);
-            ctx.fillRect(x + 12, gapTop + gapHeight + 6, pipeLength - 24, 12);
-
-            ctx.fillStyle = bossAccent;
-            ctx.fillRect(x + 18, gapTop - 8, 18, 10);
-            ctx.fillRect(x + pipeLength - 36, gapTop - 8, 18, 10);
-            ctx.fillRect(x + 18, gapTop + gapHeight + 12, 18, 10);
-            ctx.fillRect(x + pipeLength - 36, gapTop + gapHeight + 12, 18, 10);
-
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(x + pipeLength * 0.3, gapTop - 10, 8, 8);
-            ctx.fillRect(x + pipeLength * 0.7, gapTop - 10, 8, 8);
-            continue;
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(x + 14, topHeight - 8, 18, 8);
+            ctx.fillRect(x + pipeLength - 32, topHeight - 8, 18, 8);
+            ctx.fillRect(x + 14, bottomY + 10, 18, 8);
+            ctx.fillRect(x + pipeLength - 32, bottomY + 10, 18, 8);
         }
-
-        ctx.fillStyle = '#4ade80';
-        ctx.fillRect(x, 0, pipeLength, gapTop);
-        ctx.fillRect(x, gapTop + gapHeight, pipeLength, height - (gapTop + gapHeight) - 40);
-
-        ctx.fillStyle = '#70e2a3';
-        ctx.fillRect(x - 8, gapTop - 18, pipeLength + 16, 18);
-        ctx.fillRect(x - 8, gapTop + gapHeight, pipeLength + 16, 18);
-
-        ctx.fillStyle = '#22c55e';
-        ctx.fillRect(x + 10, gapTop - 12, pipeLength - 20, 10);
-        ctx.fillRect(x + 10, gapTop + gapHeight - 4, pipeLength - 20, 10);
     }
 }
 
