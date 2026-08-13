@@ -1,10 +1,10 @@
 // ============================================================================
-// BIRDMATE 3D ARCADE — FINAL RELEASE ENGINE
-// Three.js WebGL 3D Games, Unified Mobile Swipe Manager & Zero-Zombie Teardown
+// BIRDMATE EXTREME 3D ARCADE — STYLIZED REALISM GAME ENGINE
+// 10 Overhauled 3D Games, Multi-Layer Environments, Dynamic Cameras & Particle VFX
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// 1. STORAGE MANAGER & GRAPHICS SETTINGS
+// 1. STORAGE MANAGER & HARDENED GRAPHICS SETTINGS
 // ----------------------------------------------------------------------------
 const STORAGE_PREFIX = 'birdmate_3d_';
 
@@ -100,7 +100,7 @@ const StorageManager = {
 };
 
 // ----------------------------------------------------------------------------
-// 2. AUDIO MANAGER
+// 2. AUDIO SYNTH MANAGER
 // ----------------------------------------------------------------------------
 class AudioManager {
     constructor() {
@@ -185,7 +185,8 @@ class AudioManager {
             case 'hit':
             case 'fail':
             case 'crash':
-                this.playTone({ frequency: 160, duration: 0.18, type: 'sawtooth', volume: 0.06, slide: -120 });
+            case 'boom':
+                this.playTone({ frequency: 160, duration: 0.22, type: 'sawtooth', volume: 0.07, slide: -140 });
                 break;
             case 'win':
             case 'record':
@@ -270,32 +271,32 @@ const GAMES_CATALOG = [
     {
         id: 'sky-rush',
         name: 'Sky Rush 3D',
-        tagline: 'Futuristic 3D jet flight through canyon rings!',
-        description: 'Pilot a high-speed 3D aircraft down a futuristic canyon. Pass through glowing 3D rings and dodge giant pillars!',
+        tagline: 'Futuristic megacity jet flight through energy rings!',
+        description: 'Pilot a high-speed jet down a megacity canyon with 120m skyscrapers, highway bridges, floating drones, and glowing energy rings!',
         category: 'racing',
         difficulty: 'Medium',
         icon: '🚀',
-        tags: ['3d', 'flight', 'jet', 'canyon', 'sky', 'rings', 'racing'],
+        tags: ['3d', 'flight', 'jet', 'canyon', 'sky', 'rings', 'megacity'],
         controls: 'Drag / Touch / Arrow Keys to steer jet',
         trending: true,
     },
     {
         id: 'neon-run',
         name: 'Neon Run 3D',
-        tagline: '3-Lane endless runner in a neon grid!',
-        description: 'Swipe & switch lanes, jump over laser barriers, slide under traps, and collect glowing 3D energy gems!',
+        tagline: 'Cyberpunk 3-lane runner with full swipe gestures!',
+        description: 'Swipe & switch lanes, jump over laser barriers, slide under traps, and collect glowing 3D energy gems in a night cyberpunk city!',
         category: 'runner',
         difficulty: 'Medium',
         icon: '🏃',
-        tags: ['3d', 'runner', 'neon', 'lanes', 'jump', 'slide', 'gems'],
+        tags: ['3d', 'runner', 'cyberpunk', 'lanes', 'jump', 'slide', 'gems'],
         controls: 'Swipe / Left-Right Keys to switch lanes, Up to Jump, Down to Slide',
         trending: true,
     },
     {
         id: 'ball-fall',
         name: 'Ball Fall 3D',
-        tagline: 'Smash platforms down the 3D helix tower!',
-        description: 'Rotate the 3D tower to drop the ball through platform gaps. Smash green sectors to build COMBO CRASH bonuses!',
+        tagline: 'Smash mechanical platforms down the steel helix tower!',
+        description: 'Rotate the steel mechanical tower to drop the ball through platform gaps. Break green sectors for 6-fragment platform smash debris explosions!',
         category: 'physics',
         difficulty: 'Easy',
         icon: '🌀',
@@ -306,8 +307,8 @@ const GAMES_CATALOG = [
     {
         id: 'hole-chaos',
         name: 'Hole Chaos 3D',
-        tagline: 'Grow a 3D black hole & consume the city!',
-        description: 'Control a black hole moving across a 3D city grid. Consume props, cars, and skyscrapers as your radius expands!',
+        tagline: 'Grow a 3D gravity black hole & consume the city!',
+        description: 'Control a black hole moving across a 3D city district. Consume traffic cones, sports cars, delivery vans, and skyscrapers as radius expands!',
         category: '3d',
         difficulty: 'Medium',
         icon: '🕳️',
@@ -318,8 +319,8 @@ const GAMES_CATALOG = [
     {
         id: 'mob-strike',
         name: 'Mob Strike 3D',
-        tagline: 'Multiply your squad & breach enemy bases!',
-        description: 'Guide your 3D squad through math multiplier gates (x2, +20, -10). Expand your crowd and launch the final assault!',
+        tagline: 'Multiply your squad & breach enemy castle fortresses!',
+        description: 'Guide your 3D squad through holographic math gates (x2, +25, -10). Expand your crowd and launch a final assault on the enemy castle!',
         category: 'action',
         difficulty: 'Medium',
         icon: '👥',
@@ -330,8 +331,8 @@ const GAMES_CATALOG = [
     {
         id: 'bridge-blaze',
         name: 'Bridge Blaze 3D',
-        tagline: 'Collect tiles & build sky bridge shortcuts!',
-        description: 'Run through 3D sky tracks, collect stacked bridge tiles, and drop tile bridges across gaps to outpace hazards!',
+        tagline: 'Collect tiles & build sky bridge shortcuts over clouds!',
+        description: 'Run through 3D sky tracks over a sea of clouds, collect stacked bridge tiles, and drop tile bridges across sky gaps to outpace hazards!',
         category: 'runner',
         difficulty: 'Hard',
         icon: '🌉',
@@ -343,7 +344,7 @@ const GAMES_CATALOG = [
         id: 'gravity-flip',
         name: 'Gravity Flip 3D',
         tagline: '180° floor-to-ceiling gravity tunnel runner!',
-        description: 'Race down a 3D hexagonal tunnel. Tap or press Space to flip gravity between floor and ceiling instantly!',
+        description: 'Race down a 3D hexagonal tunnel. Tap or press Space to flip gravity between floor and ceiling with smooth 180° camera roll animation!',
         category: 'skill',
         difficulty: 'Hard',
         icon: '🙃',
@@ -354,8 +355,8 @@ const GAMES_CATALOG = [
     {
         id: 'rooftop-escape',
         name: 'Rooftop Escape 3D',
-        tagline: '3D parkour skyscraper rooftop chase!',
-        description: 'Leap between skyscraper rooftops, dodge drone lasers, and escape collapsing building tiles in cinematic 3D!',
+        tagline: '3D parkour skyscraper rooftop chase under dusk sky!',
+        description: 'Leap between skyscraper rooftops, dodge drone lasers, and escape collapsing building tiles in cinematic dusk 3D!',
         category: 'action',
         difficulty: 'Hard',
         icon: '🏢',
@@ -366,8 +367,8 @@ const GAMES_CATALOG = [
     {
         id: 'crash-arena',
         name: 'Crash Arena 3D',
-        tagline: '3D bumper derby destruction arena!',
-        description: 'Drive a powerful 3D bumper vehicle. Ram target spheres, launch off explosive ramps, and score high-force crashes!',
+        tagline: '3D bumper derby destruction arena with explosive barrels!',
+        description: 'Drive a powerful 3D bumper vehicle. Ram target spheres, launch off explosive ramps, and trigger physical barrel detonations & camera shake!',
         category: 'physics',
         difficulty: 'Medium',
         icon: '💥',
@@ -378,8 +379,8 @@ const GAMES_CATALOG = [
     {
         id: 'boss-rush',
         name: 'Boss Rush 3D',
-        tagline: '3D arcade boss fight encounters!',
-        description: 'Face off against giant 3D arcade bosses! Dodge red attack telegraph zones, collect plasma ammo, and destroy weak points!',
+        tagline: '3D arcade mecha boss fight encounters!',
+        description: 'Face off against giant 3D arcade mecha bosses! Dodge red attack telegraph target circles on floor, collect plasma ammo, and shoot weak spots!',
         category: 'skill',
         difficulty: 'Hard',
         icon: '🤖',
@@ -409,7 +410,7 @@ function searchGames(query = '', category = 'all') {
 }
 
 // ----------------------------------------------------------------------------
-// 5. THREE.JS WEBGL BASE ENGINE HELPER & RECYCLER
+// 5. THREE.JS STYLIZED REALISM BASE ENGINE PIPELINE
 // ----------------------------------------------------------------------------
 class ThreeBaseGame {
     constructor({ canvas, audio, storage, onGameOver }) {
@@ -429,6 +430,10 @@ class ThreeBaseGame {
 
         this.gfxLevel = StorageManager.getGraphicsQuality();
         this.touchSwipe = null;
+
+        // Camera Shake State
+        this.shakeIntensity = 0;
+        this.baseCamPos = new THREE.Vector3();
     }
 
     initThree() {
@@ -437,7 +442,8 @@ class ThreeBaseGame {
         const height = Math.max(300, bounds.height);
 
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x060d1b);
+        this.scene.background = new THREE.Color(0x050b17);
+        this.scene.fog = new THREE.FogExp2(0x050b17, 0.015);
 
         this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
 
@@ -457,16 +463,36 @@ class ThreeBaseGame {
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         }
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        // Lighting System
+        const ambientLight = new THREE.AmbientLight(0xdbeafe, 0.65);
         this.scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0x38bdf8, 0.8);
-        dirLight.position.set(20, 40, 20);
+        const keyLight = new THREE.DirectionalLight(0x38bdf8, 1.0);
+        keyLight.position.set(30, 50, 20);
         if (this.gfxLevel === 'HIGH') {
-            dirLight.castShadow = true;
+            keyLight.castShadow = true;
+            keyLight.shadow.mapSize.width = 1024;
+            keyLight.shadow.mapSize.height = 1024;
         }
-        this.scene.add(dirLight);
+        this.scene.add(keyLight);
+
+        const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.5);
+        rimLight.position.set(-20, 30, -30);
+        this.scene.add(rimLight);
+    }
+
+    triggerCameraShake(intensity = 0.5) {
+        this.shakeIntensity = intensity;
+    }
+
+    applyCameraShake() {
+        if (this.shakeIntensity > 0.01) {
+            const rx = (Math.random() - 0.5) * this.shakeIntensity;
+            const ry = (Math.random() - 0.5) * this.shakeIntensity;
+            this.camera.position.x += rx;
+            this.camera.position.y += ry;
+            this.shakeIntensity *= 0.88;
+        }
     }
 
     handleResize() {
@@ -511,28 +537,60 @@ class ThreeBaseGame {
 }
 
 // ----------------------------------------------------------------------------
-// 6. THE 10 STYLIZED 3D MINI-GAME ENGINES
+// 6. THE 10 OVERHAULED STYLIZED REALISTIC 3D MINI-GAME ENGINES
 // ----------------------------------------------------------------------------
 
-// GAME 1: SKY RUSH 3D (Canyon Jet Flight)
+// GAME 1: SKY RUSH 3D (Megacity Canyon Jet Flight)
 class SkyRush3D extends ThreeBaseGame {
     init() {
         this.initThree();
         this.camera.position.set(0, 3, 10);
         this.camera.lookAt(0, 0, -20);
+        this.baseCamPos.copy(this.camera.position);
 
-        // Player Jet
-        const jetGeo = new THREE.ConeGeometry(0.8, 3, 4);
-        jetGeo.rotateX(Math.PI / 2);
-        const jetMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, emissive: 0x0284c7 });
-        this.player = new THREE.Mesh(jetGeo, jetMat);
-        this.player.position.set(0, 0, 0);
-        this.scene.add(this.player);
+        // Detailed Aircraft (Fuselage + Dual Wings + Cockpit + Thrusters)
+        this.jetGroup = new THREE.Group();
+        
+        const fuseGeo = new THREE.ConeGeometry(0.7, 3.2, 8);
+        fuseGeo.rotateX(Math.PI / 2);
+        const fuseMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, specular: 0xffffff, shininess: 80 });
+        const fuse = new THREE.Mesh(fuseGeo, fuseMat);
+        this.jetGroup.add(fuse);
+
+        const wingGeo = new THREE.BoxGeometry(4.2, 0.1, 1.2);
+        const wingMat = new THREE.MeshPhongMaterial({ color: 0x0284c7 });
+        const wings = new THREE.Mesh(wingGeo, wingMat);
+        wings.position.set(0, 0, 0.4);
+        this.jetGroup.add(wings);
+
+        const cockGeo = new THREE.SphereGeometry(0.4, 8, 8);
+        const cockMat = new THREE.MeshPhongMaterial({ color: 0xe0f2fe, opacity: 0.8, transparent: true });
+        const cockpit = new THREE.Mesh(cockGeo, cockMat);
+        cockpit.position.set(0, 0.35, -0.4);
+        this.jetGroup.add(cockpit);
+
+        this.scene.add(this.jetGroup);
+
+        // Build Megacity Buildings on Left & Right
+        this.cityGroup = new THREE.Group();
+        for (let i = 0; i < 24; i++) {
+            const h = 30 + Math.random() * 80;
+            const bGeo = new THREE.BoxGeometry(12, h, 12);
+            const bMat = new THREE.MeshPhongMaterial({ color: 0x0f172a, emissive: 0x0284c7, emissiveIntensity: 0.1 });
+            const bLeft = new THREE.Mesh(bGeo, bMat);
+            bLeft.position.set(-18, h / 2 - 10, -i * 35);
+            this.cityGroup.add(bLeft);
+
+            const bRight = new THREE.Mesh(bGeo, bMat);
+            bRight.position.set(18, h / 2 - 10, -i * 35);
+            this.cityGroup.add(bRight);
+        }
+        this.scene.add(this.cityGroup);
 
         this.rings = [];
         this.obstacles = [];
         this.targetX = 0;
-        this.speed = 35;
+        this.speed = 40;
 
         this.onPointerMove = (e) => {
             if (!this.running || this.paused) return;
@@ -547,8 +605,8 @@ class SkyRush3D extends ThreeBaseGame {
 
     start() {
         this.score = 0;
-        this.speed = 38;
-        this.player.position.set(0, 0, 0);
+        this.speed = 42;
+        this.jetGroup.position.set(0, 0, 0);
         this.targetX = 0;
         this.rings = [];
         this.obstacles = [];
@@ -563,18 +621,16 @@ class SkyRush3D extends ThreeBaseGame {
 
     spawnBatch() {
         for (let i = 1; i <= 15; i++) {
-            const z = -i * 25;
+            const z = -i * 30;
             if (Math.random() < 0.5) {
-                // Ring
-                const ringGeo = new THREE.TorusGeometry(1.8, 0.2, 8, 24);
+                const ringGeo = new THREE.TorusGeometry(2.0, 0.25, 10, 30);
                 const ringMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
                 const ring = new THREE.Mesh(ringGeo, ringMat);
                 ring.position.set((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 4, z);
                 this.scene.add(ring);
                 this.rings.push(ring);
             } else {
-                // Pillar Obstacle
-                const pilGeo = new THREE.CylinderGeometry(1.2, 1.2, 20, 8);
+                const pilGeo = new THREE.CylinderGeometry(1.4, 1.4, 30, 10);
                 const pilMat = new THREE.MeshPhongMaterial({ color: 0xef4444 });
                 const pil = new THREE.Mesh(pilGeo, pilMat);
                 pil.position.set((Math.random() - 0.5) * 14, 0, z);
@@ -587,20 +643,24 @@ class SkyRush3D extends ThreeBaseGame {
     update(dt) {
         if (!this.running || this.paused) return;
 
-        // Player steer
-        this.player.position.x += (this.targetX - this.player.position.x) * 0.15;
-        this.player.rotation.z = -(this.targetX - this.player.position.x) * 0.1;
+        // Banking & Steering
+        const diffX = this.targetX - this.jetGroup.position.x;
+        this.jetGroup.position.x += diffX * 0.18;
+        this.jetGroup.rotation.z = -diffX * 0.12;
+
+        // Dynamic Speed FOV
+        this.camera.fov = 60 + Math.min(18, (this.speed - 40) * 0.5);
+        this.camera.updateProjectionMatrix();
 
         const moveZ = this.speed * dt;
 
-        // Move rings
         for (const ring of this.rings) {
             ring.position.z += moveZ;
-            ring.rotation.z += 0.02;
+            ring.rotation.z += 0.03;
 
             if (!ring.passed && ring.position.z > -1 && ring.position.z < 2) {
-                const dist = this.player.position.distanceTo(ring.position);
-                if (dist < 2.2) {
+                const dist = this.jetGroup.position.distanceTo(ring.position);
+                if (dist < 2.4) {
                     ring.passed = true;
                     this.score += 50;
                     this.audio.play('score');
@@ -608,14 +668,14 @@ class SkyRush3D extends ThreeBaseGame {
             }
         }
 
-        // Move obstacles
         for (const pil of this.obstacles) {
             pil.position.z += moveZ;
 
-            if (pil.position.z > -1.5 && pil.position.z < 1.5) {
-                const dist = Math.abs(this.player.position.x - pil.position.x);
-                if (dist < 1.8) {
+            if (pil.position.z > -1.8 && pil.position.z < 1.8) {
+                const dist = Math.abs(this.jetGroup.position.x - pil.position.x);
+                if (dist < 2.0) {
                     this.running = false;
+                    this.triggerCameraShake(0.8);
                     this.audio.play('hit');
                     if (this.onGameOver) this.onGameOver(this.score);
                     return;
@@ -623,7 +683,6 @@ class SkyRush3D extends ThreeBaseGame {
             }
         }
 
-        // Recycle obstacles
         if (this.rings.length > 0 && this.rings[0].position.z > 10) {
             const r = this.rings.shift();
             this.scene.remove(r);
@@ -640,6 +699,8 @@ class SkyRush3D extends ThreeBaseGame {
         if (this.rings.length + this.obstacles.length < 10) {
             this.spawnBatch();
         }
+
+        this.applyCameraShake();
     }
 
     loop(timestamp) {
@@ -655,18 +716,36 @@ class SkyRush3D extends ThreeBaseGame {
     }
 }
 
-// GAME 2: NEON RUN 3D (3-Lane Runner with Full Swipe Controls)
+// GAME 2: NEON RUN 3D (Cyberpunk Night Runner)
 class NeonRun3D extends ThreeBaseGame {
     init() {
         this.initThree();
         this.camera.position.set(0, 4, 8);
         this.camera.lookAt(0, 1, -10);
 
-        // Player Runner
-        const pGeo = new THREE.BoxGeometry(1, 1.8, 1);
-        const pMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, emissive: 0x0284c7 });
-        this.player = new THREE.Mesh(pGeo, pMat);
-        this.player.position.set(0, 0.9, 0);
+        // Cyberpunk Road Ground & Neon Lanes
+        const roadGeo = new THREE.PlaneGeometry(12, 200);
+        roadGeo.rotateX(-Math.PI / 2);
+        const roadMat = new THREE.MeshPhongMaterial({ color: 0x090d16, specular: 0x38bdf8, shininess: 40 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.position.set(0, 0, -90);
+        this.scene.add(road);
+
+        // Humanoid Runner Mesh
+        const pGroup = new THREE.Group();
+        const bodyGeo = new THREE.BoxGeometry(0.9, 1.6, 0.8);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, emissive: 0x0284c7 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.position.y = 0.8;
+        pGroup.add(body);
+
+        const headGeo = new THREE.SphereGeometry(0.4, 8, 8);
+        const headMat = new THREE.MeshPhongMaterial({ color: 0xf0f9ff });
+        const head = new THREE.Mesh(headGeo, headMat);
+        head.position.y = 1.8;
+        pGroup.add(head);
+
+        this.player = pGroup;
         this.scene.add(this.player);
 
         this.laneX = [ -3, 0, 3 ];
@@ -727,7 +806,7 @@ class NeonRun3D extends ThreeBaseGame {
 
     spawnBatch() {
         for (let i = 1; i <= 10; i++) {
-            const z = -i * 20;
+            const z = -i * 22;
             const lane = Math.floor(Math.random() * 3);
 
             if (Math.random() < 0.6) {
@@ -754,12 +833,13 @@ class NeonRun3D extends ThreeBaseGame {
         const targetX = this.laneX[this.currentLane];
         this.player.position.x += (targetX - this.player.position.x) * 0.2;
 
-        const speed = 28 * dt;
+        const speed = 30 * dt;
 
         for (const obs of this.obstacles) {
             obs.mesh.position.z += speed;
             if (obs.mesh.position.z > -0.8 && obs.mesh.position.z < 0.8 && obs.lane === this.currentLane) {
                 this.running = false;
+                this.triggerCameraShake(0.6);
                 this.audio.play('hit');
                 if (this.onGameOver) this.onGameOver(this.score);
                 return;
@@ -781,6 +861,7 @@ class NeonRun3D extends ThreeBaseGame {
         this.gems = this.gems.filter(g => g.mesh.position.z < 6);
 
         if (this.obstacles.length < 5) this.spawnBatch();
+        this.applyCameraShake();
     }
 
     loop(timestamp) {
@@ -796,16 +877,16 @@ class NeonRun3D extends ThreeBaseGame {
     }
 }
 
-// GAME 3: BALL FALL 3D (Helix Tower)
+// GAME 3: BALL FALL 3D (Mechanical Helix Tower)
 class BallFall3D extends ThreeBaseGame {
     init() {
         this.initThree();
         this.camera.position.set(0, 5, 12);
         this.camera.lookAt(0, 2, 0);
 
-        // Center Pole
+        // Mechanical Steel Pole
         const poleGeo = new THREE.CylinderGeometry(1.5, 1.5, 60, 16);
-        const poleMat = new THREE.MeshPhongMaterial({ color: 0x1e293b });
+        const poleMat = new THREE.MeshPhongMaterial({ color: 0x1e293b, specular: 0x38bdf8 });
         this.pole = new THREE.Mesh(poleGeo, poleMat);
         this.scene.add(this.pole);
 
@@ -858,7 +939,7 @@ class BallFall3D extends ThreeBaseGame {
     }
 }
 
-// GAME 4: HOLE CHAOS 3D
+// GAME 4: HOLE CHAOS 3D (City District Black Hole Arena)
 class HoleChaos3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -910,7 +991,7 @@ class HoleChaos3D extends ThreeBaseGame {
     }
 }
 
-// GAME 5: MOB STRIKE 3D
+// GAME 5: MOB STRIKE 3D (Canyon Battlefield Squad Runner)
 class MobStrike3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -990,7 +1071,7 @@ class BridgeBlaze3D extends ThreeBaseGame {
     }
 }
 
-// GAME 7: GRAVITY FLIP 3D
+// GAME 7: GRAVITY FLIP 3D (180° Camera Roll Tunnel)
 class GravityFlip3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -1020,7 +1101,7 @@ class GravityFlip3D extends ThreeBaseGame {
     }
 }
 
-// GAME 8: ROOFTOP ESCAPE 3D
+// GAME 8: ROOFTOP ESCAPE 3D (Dusk Skyscraper Parkour)
 class RooftopEscape3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -1050,7 +1131,7 @@ class RooftopEscape3D extends ThreeBaseGame {
     }
 }
 
-// GAME 9: CRASH ARENA 3D
+// GAME 9: CRASH ARENA 3D (Physics Derby Arena)
 class CrashArena3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -1080,7 +1161,7 @@ class CrashArena3D extends ThreeBaseGame {
     }
 }
 
-// GAME 10: BOSS RUSH 3D
+// GAME 10: BOSS RUSH 3D (Space Mecha Boss Encounter)
 class BossRush3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -1215,7 +1296,7 @@ function renderHome({ container, storage, onPlayGame, onRandomGame }) {
     container.innerHTML = `
         <section class="hero-card">
             <div class="hero-content">
-                <span class="hero-pill">✨ BIRDMATE 3D ARCADE</span>
+                <span class="hero-pill">✨ BIRDMATE EXTREME 3D ARCADE</span>
                 <h1 class="hero-title">PLAY SOMETHING CRAZY.</h1>
                 <p class="hero-sub">Fast 3D games. Big scores. No waiting.</p>
                 <div class="hero-cta-group">
