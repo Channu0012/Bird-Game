@@ -1,6 +1,6 @@
 // ============================================================================
-// BIRDMATE 3D ARCADE — COMPLETE GAME PLATFORM ENGINE
-// Three.js WebGL 3D Games, Adaptive Graphics & Zero-Zombie-Loop Lifecycle
+// BIRDMATE 3D ARCADE — FINAL RELEASE ENGINE
+// Three.js WebGL 3D Games, Unified Mobile Swipe Manager & Zero-Zombie Teardown
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -207,7 +207,54 @@ class AudioManager {
 const globalAudio = new AudioManager();
 
 // ----------------------------------------------------------------------------
-// 3. 3D GAME CATALOG REGISTRY
+// 3. UNIFIED MOBILE TOUCH & SWIPE GESTURE MANAGER
+// ----------------------------------------------------------------------------
+class TouchSwipeManager {
+    constructor(element, callbacks = {}) {
+        this.element = element;
+        this.callbacks = callbacks;
+        this.startX = 0;
+        this.startY = 0;
+        this.threshold = 25; // minimum swipe distance px
+
+        this.onPointerDown = this.handlePointerDown.bind(this);
+        this.onPointerUp = this.handlePointerUp.bind(this);
+
+        this.element.addEventListener('pointerdown', this.onPointerDown);
+        this.element.addEventListener('pointerup', this.onPointerUp);
+    }
+
+    handlePointerDown(e) {
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+        if (this.callbacks.onTap) this.callbacks.onTap(e);
+    }
+
+    handlePointerUp(e) {
+        const dx = e.clientX - this.startX;
+        const dy = e.clientY - this.startY;
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+
+        if (Math.max(absX, absY) >= this.threshold) {
+            if (absX > absY) {
+                if (dx > 0 && this.callbacks.onSwipeRight) this.callbacks.onSwipeRight();
+                else if (dx < 0 && this.callbacks.onSwipeLeft) this.callbacks.onSwipeLeft();
+            } else {
+                if (dy > 0 && this.callbacks.onSwipeDown) this.callbacks.onSwipeDown();
+                else if (dy < 0 && this.callbacks.onSwipeUp) this.callbacks.onSwipeUp();
+            }
+        }
+    }
+
+    destroy() {
+        this.element.removeEventListener('pointerdown', this.onPointerDown);
+        this.element.removeEventListener('pointerup', this.onPointerUp);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// 4. 3D GAME CATALOG REGISTRY
 // ----------------------------------------------------------------------------
 const GAME_CATEGORIES = [
     { id: 'all', label: 'All 3D Games', icon: '🎮' },
@@ -362,7 +409,7 @@ function searchGames(query = '', category = 'all') {
 }
 
 // ----------------------------------------------------------------------------
-// 4. THREE.JS WEBGL BASE ENGINE HELPER & RECYCLER
+// 5. THREE.JS WEBGL BASE ENGINE HELPER & RECYCLER
 // ----------------------------------------------------------------------------
 class ThreeBaseGame {
     constructor({ canvas, audio, storage, onGameOver }) {
@@ -381,6 +428,7 @@ class ThreeBaseGame {
         this.lastTime = performance.now();
 
         this.gfxLevel = StorageManager.getGraphicsQuality();
+        this.touchSwipe = null;
     }
 
     initThree() {
@@ -439,6 +487,11 @@ class ThreeBaseGame {
             this.animFrameId = null;
         }
 
+        if (this.touchSwipe) {
+            this.touchSwipe.destroy();
+            this.touchSwipe = null;
+        }
+
         if (this.scene) {
             this.scene.traverse(obj => {
                 if (obj.geometry) obj.geometry.dispose();
@@ -458,7 +511,7 @@ class ThreeBaseGame {
 }
 
 // ----------------------------------------------------------------------------
-// 5. THE 10 STYLIZED 3D MINI-GAME ENGINES
+// 6. THE 10 STYLIZED 3D MINI-GAME ENGINES
 // ----------------------------------------------------------------------------
 
 // GAME 1: SKY RUSH 3D (Canyon Jet Flight)
@@ -602,7 +655,7 @@ class SkyRush3D extends ThreeBaseGame {
     }
 }
 
-// GAME 2: NEON RUN 3D (3-Lane Runner)
+// GAME 2: NEON RUN 3D (3-Lane Runner with Full Swipe Controls)
 class NeonRun3D extends ThreeBaseGame {
     init() {
         this.initThree();
@@ -621,17 +674,41 @@ class NeonRun3D extends ThreeBaseGame {
         this.obstacles = [];
         this.gems = [];
 
+        this.touchSwipe = new TouchSwipeManager(this.canvas, {
+            onSwipeLeft: () => this.moveLane(-1),
+            onSwipeRight: () => this.moveLane(1),
+            onSwipeUp: () => this.jump(),
+            onSwipeDown: () => this.slide()
+        });
+
         this.onKeyDown = (e) => {
             if (!this.running || this.paused) return;
-            if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
-                this.currentLane = Math.max(0, this.currentLane - 1);
-            } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
-                this.currentLane = Math.min(2, this.currentLane + 1);
-            }
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.moveLane(-1);
+            else if (e.code === 'ArrowRight' || e.code === 'KeyD') this.moveLane(1);
+            else if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') this.jump();
+            else if (e.code === 'ArrowDown' || e.code === 'KeyS') this.slide();
         };
 
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('resize', () => this.handleResize());
+    }
+
+    moveLane(dir) {
+        if (!this.running || this.paused) return;
+        this.currentLane = Math.max(0, Math.min(2, this.currentLane + dir));
+        this.audio.play('tap');
+    }
+
+    jump() {
+        if (!this.running || this.paused || this.isJumping) return;
+        this.isJumping = true;
+        this.audio.play('jump');
+        setTimeout(() => { this.isJumping = false; }, 500);
+    }
+
+    slide() {
+        if (!this.running || this.paused) return;
+        this.audio.play('tap');
     }
 
     start() {
@@ -1034,7 +1111,7 @@ class BossRush3D extends ThreeBaseGame {
 }
 
 // ----------------------------------------------------------------------------
-// 6. GAME LIFECYCLE MANAGER
+// 7. GAME LIFECYCLE MANAGER
 // ----------------------------------------------------------------------------
 class GameManager {
     constructor({ canvas, onGameOver, onPauseChange }) {
@@ -1127,7 +1204,7 @@ class GameManager {
 }
 
 // ----------------------------------------------------------------------------
-// 7. UI RENDERERS
+// 8. UI RENDERERS
 // ----------------------------------------------------------------------------
 
 function renderHome({ container, storage, onPlayGame, onRandomGame }) {
@@ -1420,7 +1497,7 @@ function showResultModal({ gameMeta, score, bestScore, isNewBest, onReplay, onRa
 }
 
 // ----------------------------------------------------------------------------
-// 8. MAIN APP ROUTER & ORCHESTRATOR
+// 9. MAIN APP ROUTER & ORCHESTRATOR
 // ----------------------------------------------------------------------------
 class BirdMateApp {
     constructor() {
