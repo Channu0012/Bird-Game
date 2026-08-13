@@ -5,26 +5,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#050b17" />
-    <meta name="title" content="BirdMate 2.0 — Crazy Mini-Game Playground" />
+    <meta name="title" content="BirdMate 3D Arcade — Premium 3D Mini-Game Platform" />
     <meta name="description"
-        content="Play 10 fast, addictive mini-games on BirdMate! Crazy Bird, Tap Rush, Brain Trap, Dodge It, Perfect Hit, Stack Master, Bomb Run, Color Chaos, Run Till Dead, Memory Blitz." />
-    <meta name="keywords" content="BirdMate, Crazy Bird, mini games, arcade platform, browser games, tap rush, stack master, brain trap" />
+        content="Play 10 stylized 3D arcade games on BirdMate! Sky Rush, Neon Run, Ball Fall, Hole Chaos, Mob Strike, Bridge Blaze, Gravity Flip, Rooftop Escape, Crash Arena, Boss Rush." />
+    <meta name="keywords" content="BirdMate 3D, WebGL games, 3D arcade, hyper casual, Three.js games, runner, sky rush, mob strike" />
     <meta name="author" content="Channu" />
-    <meta property="og:title" content="BirdMate 2.0 — Crazy Mini-Game Playground" />
-    <meta property="og:description" content="Play 10 fast, addictive mini-games on BirdMate! Play, compete, set records, and repeat!" />
+    <meta property="og:title" content="BirdMate 3D Arcade — Premium 3D Mini-Game Platform" />
+    <meta property="og:description" content="Play 10 stylized 3D arcade games on BirdMate! Play, compete, set records, and repeat!" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://raw.githubusercontent.com/Channu0012/Bird-Game/main/logo.png" />
     <meta property="og:url" content="https://birdmate.netlify.app/" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="BirdMate 2.0 Mini-Games" />
-    <meta name="twitter:description" content="Play 10 fast, addictive mini-games on BirdMate!" />
+    <meta name="twitter:title" content="BirdMate 3D Arcade" />
+    <meta name="twitter:description" content="Play 10 stylized 3D arcade games on BirdMate 3D!" />
     <meta name="twitter:image" content="https://raw.githubusercontent.com/Channu0012/Bird-Game/main/logo.png" />
-    <title>BirdMate 2.0 — Crazy Mini-Game Platform</title>
+    <title>BirdMate 3D Arcade — Premium Browser Games</title>
     <link rel="icon" type="image/png" href="logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
+    <!-- THREE.JS WEBGL 3D ENGINE CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 
 <body>
@@ -33,19 +35,27 @@
         <header class="topbar">
             <div class="topbar-left">
                 <a href="#" class="brand-wrap nav-link" data-view="home" aria-label="BirdMate Home">
-                    <span class="brand-badge">🐤</span>
-                    <span class="brand-title">BirdMate</span>
+                    <span class="brand-badge">🎮</span>
+                    <span class="brand-title">BirdMate <small class="brand-tag">3D ARCADE</small></span>
                 </a>
                 <nav class="nav-links">
                     <a href="#" class="nav-link active" data-view="home">Home</a>
-                    <a href="#" class="nav-link" data-view="games">Games</a>
+                    <a href="#" class="nav-link" data-view="games">3D Games</a>
                     <a href="#" class="nav-link" data-view="profile">Profile</a>
                 </nav>
             </div>
 
             <div class="topbar-right">
                 <div class="header-search-wrap">
-                    <input id="headerSearch" type="text" placeholder="Search games..." aria-label="Search games" />
+                    <input id="headerSearch" type="text" placeholder="Search 3D games..." aria-label="Search 3D games" />
+                </div>
+
+                <div class="graphics-selector-wrap" title="Adaptive Graphics Quality">
+                    <select id="gfxSelect" class="gfx-select" aria-label="Graphics Quality">
+                        <option value="HIGH">✨ HIGH 3D</option>
+                        <option value="MEDIUM" selected>⚡ MED 3D</option>
+                        <option value="LOW">🔋 LOW 3D</option>
+                    </select>
                 </div>
 
                 <div id="hudControls" class="hud-controls" style="display: none;">
@@ -62,9 +72,9 @@
         <!-- PLATFORM VIEW CONTAINER (HOME / CATALOG / PROFILE) -->
         <main id="viewContainer" class="view-container"></main>
 
-        <!-- ACTIVE GAME PLAYING VIEW -->
+        <!-- ACTIVE 3D GAME PLAYING VIEW -->
         <div id="playingCard" class="game-card" style="display: none;">
-            <canvas id="gameCanvas" width="900" height="620" aria-label="BirdMate gameplay canvas"></canvas>
+            <canvas id="gameCanvas" width="900" height="620" aria-label="BirdMate 3D gameplay canvas"></canvas>
         </div>
 
         <!-- RESULT MODAL OVERLAY -->
@@ -74,7 +84,7 @@
         <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>
 
-    <!-- CONSOLIDATED PLATFORM & ENGINE SCRIPT -->
+    <!-- MAIN PLATFORM & 3D GAMES ENGINE SCRIPT -->
     <script src="script.js"></script>
 </body>
 
