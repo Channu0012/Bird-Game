@@ -3,59 +3,64 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#050b17" />
-    <meta name="title" content="Crazy Bird - Flappy Style Arcade Game" />
+    <meta name="title" content="BirdMate - Flappy Arcade Flight Game" />
     <meta name="description"
-        content="Play Crazy Bird, a fast and colorful arcade flying game with smooth controls, score tracking, and a neon sky world." />
-    <meta name="keywords" content="Crazy Bird, arcade game, flappy game, browser game, flying game" />
+        content="Play BirdMate, a fast, fluid, and colorful arcade flying game with high scores, medals, parallax sky, and responsive touch controls." />
+    <meta name="keywords" content="BirdMate, Crazy Bird, arcade game, flappy game, browser game, flying game" />
     <meta name="author" content="Channu" />
-    <meta property="og:title" content="Crazy Bird" />
-    <meta property="og:description" content="A colorful arcade flying game built for fun and browser play." />
+    <meta property="og:title" content="BirdMate - Flappy Arcade Flight Game" />
+    <meta property="og:description" content="Fly the bird, pass the pipes, earn medals, and set legendary high scores!" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://raw.githubusercontent.com/Channu0012/Bird-Game/main/logo.png" />
     <meta property="og:url" content="https://channu0012.github.io/Bird-Game/" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Crazy Bird" />
-    <meta name="twitter:description" content="Fly the bird, dodge the pipes, and chase a new high score." />
+    <meta name="twitter:title" content="BirdMate" />
+    <meta name="twitter:description" content="Fly the bird, dodge the obstacles, and chase your high score!" />
     <meta name="twitter:image" content="https://raw.githubusercontent.com/Channu0012/Bird-Game/main/logo.png" />
-    <title>Crazy Bird</title>
+    <title>BirdMate - Crazy Bird Arcade</title>
     <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
     <div class="page-shell">
         <header class="topbar">
-            <div class="brand-wrap" aria-label="Game title">
-                <span class="brand-mark" aria-hidden="true"> </span>
+            <div class="brand-wrap" aria-label="Game Title">
+                <span class="brand-badge">🐤</span>
+                <span class="brand-title">BirdMate</span>
             </div>
 
             <div class="hud" aria-label="Game status">
                 <span class="hud-pill">Score <strong id="score">0</strong></span>
                 <span class="hud-pill">Best <strong id="best">0</strong></span>
                 <span class="hud-pill">Speed <strong id="speedLabel">1.0x</strong></span>
-                <button id="pauseButton" class="pause-button" type="button" aria-label="Pause game">
+                <button id="pauseButton" class="pause-button" type="button" aria-label="Pause game" title="Pause Game (P)">
                     Pause
                 </button>
-                <button id="soundToggle" class="sound-toggle" type="button" aria-label="Toggle sound"
-                    aria-pressed="false">
+                <button id="soundToggle" class="sound-toggle" type="button" aria-label="Toggle sound" aria-pressed="false" title="Toggle Sound (M)">
                     🔊
                 </button>
             </div>
         </header>
 
         <main class="game-card">
-            <canvas id="gameCanvas" width="900" height="620" aria-label="Crazy Bird game"></canvas>
+            <canvas id="gameCanvas" width="900" height="620" aria-label="BirdMate gameplay canvas"></canvas>
             <div id="overlay" class="overlay visible">
                 <div class="panel">
                     <div class="panel-glow"></div>
-                    <h1>Crazy Bird</h1>
-                    <p>Tap, click, or press space to flap</p>
-                    <button id="startButton" type="button">Play</button>
+                    <h1>BirdMate</h1>
+                    <p>Tap, click, or press Space to flap</p>
+                    <button id="startButton" type="button">Play Now</button>
                 </div>
             </div>
         </main>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
     </div>
 
     <script src="script.js"></script>
